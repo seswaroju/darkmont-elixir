@@ -41,21 +41,6 @@ export default function Home() {
       .then((data) => setProducts(data));
   }, []);
 
-  useEffect(() => {
-    fetch("http://localhost:5050/api/hello")
-      .then((res) => res.json())
-      .then((data) => setMessage(data.message))
-      .catch(() => setMessage("❌ Failed to connect to backend"));
-  }, []);
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-white">
-      <h1 className="text-3xl font-bold text-green-600">
-        {message || "Connecting..."}
-      </h1>
-    </main>
-  );
-
   // Preloader effect
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -746,22 +731,41 @@ export default function Home() {
                 Subscribe to receive exclusive insights, early access to limited releases, and invitations to our
                 private tasting events.
               </p>
-
-              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <Input
+              <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const formData = new FormData(form);
+                  const payload = {
+                    name: formData.get("name") || "", // optional, if no name field
+                    email: formData.get("email"),
+                    message: formData.get("message") || "",
+                  };
+                
+                  const res = await fetch("http://localhost:5050/api/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                  });
+                
+                  const result = await res.json();
+                  alert(result.message || "Submitted!");
+                  form.reset();
+                }}
+                className="w-full max-w-lg flex flex-col gap-4 md:flex-row md:items-center"
+              >
+                <input
                   type="email"
-                  placeholder="Your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
                   required
-                  className="flex-grow border-[#D4AF37]/20 focus:border-[#D4AF37]/40 focus:ring-[#D4AF37]/10"
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none"
                 />
-                <Button
+                <button
                   type="submit"
-                  className="bg-[#D4AF37] text-white hover:bg-[#B38728] transition-all duration-300"
+                  className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800 transition"
                 >
-                  Subscribe
-                </Button>
+                  Join Now
+                </button>
               </form>
 
               <p className="text-xs text-[#444444]/70 mt-4">
@@ -770,6 +774,20 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* 🔥 Product Section From Backend API */}
+        <section className="w-full max-w-6xl mx-auto mt-20 px-4">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Our Products</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div key={product.id} className="border rounded p-4 shadow bg-white">
+                <h3 className="text-lg font-semibold">{product.name}</h3>
+                <p className="text-sm text-gray-600">{product.flavor}</p>
+                <p className="mt-2 text-green-700 font-bold">${product.price}</p>
+              </div>
+            ))}
+          </div>
+        </section> 
       </main>
 
       {/* Footer with lighter styling */}

@@ -41,11 +41,21 @@ export default function SignUp() {
       // In a real implementation, this would connect to an authentication service
       console.log("Signing up with:", name, email, password)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Redirect to home page after successful registration
-      window.location.href = "/"
+      const res = await fetch("http://localhost:5050/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to register.");
+      }
+      
+      console.log("✅ Registered:", data);
+      window.location.href = "/";
+      
     } catch (err) {
       setError("An error occurred during registration. Please try again.")
     } finally {
