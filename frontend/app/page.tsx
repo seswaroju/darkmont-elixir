@@ -15,6 +15,7 @@ import { PressLogo } from "@/components/press-logo"
 import { CustomCursor } from "@/components/custom-cursor"
 import { Preloader } from "@/components/preloader"
 
+
 export default function Home() {
   // Fix the hero section and scrolling issues
   const heroRef = useRef<HTMLDivElement>(null)
@@ -24,6 +25,36 @@ export default function Home() {
   const pourAudioRef = useRef<HTMLAudioElement | null>(null)
   const [scrolled, setScrolled] = useState(false)
   const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+
+  type Product = {
+    id: number;
+    name: string;
+    price: number;
+    flavor: string;
+  };
+  
+  const [products, setProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    fetch('http://localhost:5050/api/products')
+      .then((res) => res.json())
+      .then((data) => setProducts(data));
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:5050/api/hello")
+      .then((res) => res.json())
+      .then((data) => setMessage(data.message))
+      .catch(() => setMessage("❌ Failed to connect to backend"));
+  }, []);
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center bg-white">
+      <h1 className="text-3xl font-bold text-green-600">
+        {message || "Connecting..."}
+      </h1>
+    </main>
+  );
 
   // Preloader effect
   useEffect(() => {
